@@ -6,14 +6,14 @@ import { Card } from "@/components/ui/card";
 import UserCard from "@/components/UserCard";
 import ModeratorCard from "@/components/ModeratorCard";
 import { formatDate } from "@/lib/utils";
-import { ElectionStatus, PreviousElection } from "@/lib/types";
+import { ElectionStatus, PreviousElection, ModeratorWithRole } from "@/lib/types";
 
 export default function Home() {
   // Fetch election status
   const { 
     data: electionStatus,
     isLoading: isLoadingStatus 
-  } = useQuery({
+  } = useQuery<ElectionStatus>({
     queryKey: ['/api/election/status'],
     refetchInterval: 60000, // Refetch every minute
   });
@@ -22,7 +22,7 @@ export default function Home() {
   const { 
     data: electionHistory,
     isLoading: isLoadingHistory 
-  } = useQuery({
+  } = useQuery<PreviousElection[]>({
     queryKey: ['/api/election/history'],
   });
 
@@ -116,7 +116,7 @@ export default function Home() {
           </h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {government.moderationTeam.map((moderator, index) => (
+            {government.moderationTeam.map((moderator: ModeratorWithRole, index: number) => (
               <ModeratorCard key={index} moderator={moderator} />
             ))}
           </div>
