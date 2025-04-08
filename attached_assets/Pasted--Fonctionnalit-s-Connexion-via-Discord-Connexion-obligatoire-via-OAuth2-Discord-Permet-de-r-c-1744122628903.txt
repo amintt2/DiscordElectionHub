@@ -1,0 +1,76 @@
+🧱 Fonctionnalités
+🔐 Connexion via Discord
+Connexion obligatoire via OAuth2 Discord.
+
+Permet de récupérer l'identité Discord de l’utilisateur pour voter ou se présenter.
+
+🏠 Page d'accueil (/)
+Si un Gouvernement est actuellement en place, afficher :
+
+👑 Président du serveur (avatar + pseudo Discord)
+
+🤝 Premier Modérateur (le bras droit)
+
+🧑‍⚖️ Équipe de modération avec des rôles originaux, par exemple :
+
+🔐 Modérateur de l’Intérieur (gère les salons, règles, signalements)
+
+🌍 Modérateur des Frontières (gère les nouveaux arrivants / vérification)
+
+🔞 Modérateur NSFW (supervise les canaux sensibles)
+
+💬 Modérateur de l’Ambiance (veille à la bonne humeur)
+
+🤖 Modérateur Tech (bots, commandes, bugs)
+
+Affichage de la durée du mandat et du prochain vote.
+
+🗳️ Période d’élection (automatique)
+Déclenchée tous les 6 mois (semestre).
+
+Passage du site en mode "vote" :
+
+Affichage du leaderboard des binômes candidats.
+
+Vote possible pour tous les utilisateurs connectés.
+
+Après la période (ex. 7 jours), l'équipe gagnante est élue.
+
+Le gouvernement précédent est archivé.
+
+✍️ Se présenter
+Page où un utilisateur peut candidater avec un binôme (Président + Premier Modérateur).
+
+Ajout d’un petit texte de présentation et d’un visuel si voulu.
+
+📁 Backend (Replit + BDD)
+Utilisateurs Discord (ID, pseudo, votes, candidatures)
+
+Stockage des équipes et des rôles de modération
+
+Gestion du calendrier des élections (détection automatique des périodes)
+
+Sécurité : empêche les doubles votes, vérifie l’authentification
+
+📄 Pages principales
+/ – Accueil (gouvernement actuel OU période d’élection)
+
+/vote – Leaderboard des candidats avec boutons de vote
+
+/candidater – Candidature en binôme (président + 1er modo)
+
+/login – Connexion Discord (OAuth2)
+
+/admin – (facultatif) Tableau de bord pour les modérateurs du vrai serveur
+
+🧰 Stack technique suggérée
+Frontend : React avec Tailwind CSS
+
+Backend : Node.js (Express) ou Python (Flask/FastAPI)
+
+Base de données : SQLite ou PostgreSQL
+
+Auth : Discord OAuth2
+
+Hébergement : Replit + BDD intégrée
+
