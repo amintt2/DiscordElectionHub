@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 223 7% 20%;
+    --foreground: 0 0% 90%;
+    
+    --card: 220 6% 18%;
+    --card-foreground: 0 0% 90%;
+    
+    --popover: 220 6% 18%;
+    --popover-foreground: 0 0% 90%;
+    
+    --primary: 235 86% 65%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 31%;
+    --secondary-foreground: 0 0% 90%;
+    
+    --muted: 223 6% 29%;
+    --muted-foreground: 0 0% 75%;
+    
+    --accent: 223 6% 24%;
+    --accent-foreground: 0 0% 90%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 223 6% 29%;
+    --input: 223 6% 29%;
+    --ring: 235 86% 65%;
+    
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-discord-bg text-discord-text font-sans antialiased;
+  }
+  
+  .avatar-border {
+    background: linear-gradient(45deg, #5865F2, #EB459E, #57F287, #FEE75C);
+    padding: 3px;
+    border-radius: 50%;
+  }
+  
+  .discord-button:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
+  }
+  
+  /* Animate pulse slow */
+  .animate-pulse-slow {
+    animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  /* Scrollbar Styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #2F3136;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #4F545C;
+    border-radius: 4px;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #5865F2;
+  }
+}
+
+/* Discord color palette */
+@layer utilities {
+  .bg-discord-bg {
+    background-color: #36393F;
+  }
+  
+  .bg-discord-darker {
+    background-color: #2F3136;
+  }
+  
+  .bg-discord-dark {
+    background-color: #36393F;
+  }
+  
+  .bg-discord-light {
+    background-color: #4F545C;
+  }
+  
+  .bg-discord-blurple {
+    background-color: #5865F2;
+  }
+  
+  .bg-discord-green {
+    background-color: #57F287;
+  }
+  
+  .bg-discord-yellow {
+    background-color: #FEE75C;
+  }
+  
+  .bg-discord-pink {
+    background-color: #EB459E;
+  }
+  
+  .bg-discord-red {
+    background-color: #ED4245;
+  }
+  
+  .text-discord-text {
+    color: #DCDDDE;
+  }
+  
+  .text-discord-muted {
+    color: #B9BBBE;
+  }
+  
+  .text-discord-blurple {
+    color: #5865F2;
+  }
+  
+  .text-discord-green {
+    color: #57F287;
+  }
+  
+  .text-discord-yellow {
+    color: #FEE75C;
+  }
+  
+  .text-discord-pink {
+    color: #EB459E;
+  }
+  
+  .text-discord-red {
+    color: #ED4245;
+  }
+  
+  .border-discord-light {
+    border-color: #4F545C;
+  }
+  
+  .border-discord-darker {
+    border-color: #202225;
+  }
+}
+
+/* Font family setup */
+@layer base {
+  .font-heading {
+    font-family: 'Poppins', sans-serif;
+  }
+  
+  .font-sans {
+    font-family: 'Inter', sans-serif;
+  }
+}
