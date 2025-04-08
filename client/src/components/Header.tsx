@@ -31,9 +31,9 @@ export default function Header() {
             className="h-8 w-8" 
           />
           <Link href="/">
-            <a className="text-white font-heading font-bold text-xl md:text-2xl">
+            <span className="text-white font-heading font-bold text-xl md:text-2xl cursor-pointer">
               Discord Election
-            </a>
+            </span>
           </Link>
         </div>
         
