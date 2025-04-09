@@ -21,6 +21,8 @@ A web platform for managing democratic elections within Discord communities, fea
 
 ## Installation
 
+### Local Development
+
 1. Clone the repository
 ```bash
 git clone https://github.com/yourusername/discord-election-leaderboard.git
@@ -42,6 +44,33 @@ DISCORD_CLIENT_SECRET=your_client_secret
 ```bash
 npm run dev
 ```
+
+### Deployment with Coolify
+
+This application is configured for easy deployment with Coolify using Nixpacks.
+
+1. In Coolify:
+   - Create a new deployment
+   - Select your repository
+   - Select Nixpacks as the buildpack
+   - Set port to 5000
+
+2. Configure the following Environment Variables:
+   ```
+   PORT=5000
+   HOST=0.0.0.0
+   NODE_ENV=production
+   DISCORD_CLIENT_ID=your_discord_client_id
+   DISCORD_CLIENT_SECRET=your_discord_client_secret
+   DISCORD_REDIRECT_URI=https://your-deployed-app-domain.com/api/auth/discord/callback
+   SESSION_SECRET=your_random_secure_string
+   AUTH_COOKIE_SECURE=true
+   AUTH_COOKIE_SAME_SITE=lax
+   ```
+
+3. Deploy the application
+   - The deployment will use the provided nixpacks.json configuration
+   - The server will run on port 5000
 
 ## Discord Application Setup
 

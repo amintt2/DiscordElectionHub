@@ -11,7 +11,8 @@ const MemoryStoreSession = MemoryStore(session);
 // Discord OAuth2 configuration
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || "";
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || "";
-const CALLBACK_URL = process.env.CALLBACK_URL || "";
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || "";
+const DISCORD_GUILD_ID = process.env.DISCORD_GUILD_ID || "";
 
 // Check if environment variables are set
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
@@ -20,14 +21,24 @@ if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
 
 // Get host domain based on environment
 const getCallbackUrl = () => {
-  if (CALLBACK_URL) return CALLBACK_URL;
+  // Use the explicitly set redirect URI if available
+  if (DISCORD_REDIRECT_URI) return DISCORD_REDIRECT_URI;
 
-  const domains = process.env.REPLIT_DOMAINS ? 
-    process.env.REPLIT_DOMAINS.split(",")[0] : 
-    "localhost:5000";
+  // Fallback to Replit domains if on Replit
+  if (process.env.REPLIT_DOMAINS) {
+    const domain = process.env.REPLIT_DOMAINS.split(",")[0];
+    return `https://${domain}/api/auth/discord/callback`;
+  }
   
-  const protocol = domains.includes("localhost") ? "http" : "https";
-  return `${protocol}://${domains}/api/auth/discord/callback`;
+  // Get the host and port from environment or use defaults
+  const host = process.env.HOST || "localhost";
+  const port = process.env.PORT || "3000";
+  
+  // Determine the protocol based on environment
+  const protocol = host === "localhost" ? "http" : "https";
+  
+  // Build the callback URL
+  return `${protocol}://${host}${port ? `:${port}` : ""}/api/auth/discord/callback`;
 };
 
 // Set up passport for Discord OAuth2
@@ -39,8 +50,9 @@ export const setupAuth = (app: express.Express) => {
       resave: false,
       saveUninitialized: false,
       cookie: { 
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 1000 * 60 * 60 * 24 // 1 day
+        secure: process.env.AUTH_COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
+        sameSite: (process.env.AUTH_COOKIE_SAME_SITE as "strict" | "lax" | "none" | undefined) || "lax",
+        maxAge: parseInt(process.env.SESSION_MAX_AGE || "86400000") // Default: 1 day in milliseconds
       },
       store: new MemoryStoreSession({
         checkPeriod: 86400000 // 24 hours
@@ -60,7 +72,7 @@ export const setupAuth = (app: express.Express) => {
           clientID: DISCORD_CLIENT_ID,
           clientSecret: DISCORD_CLIENT_SECRET,
           callbackURL: getCallbackUrl(),
-          scope: ["identify"]
+          scope: ["identify", "guilds", "guilds.members.read"]
         },
         async (accessToken: string, refreshToken: string, profile: any, done: any) => {
           try {

@@ -1,0 +1,28 @@
+{
+  "providers": [
+    "nodejs"
+  ],
+  "buildImage": "node:18-slim",
+  "variables": {
+    "NODE_ENV": "production",
+    "PORT": "5000",
+    "HOST": "0.0.0.0"
+  },
+  "phases": {
+    "install": {
+      "cmds": [
+        "npm ci"
+      ]
+    },
+    "build": {
+      "dependsOn": ["install"],
+      "cmds": [
+        "chmod +x ./build.sh",
+        "./build.sh"
+      ]
+    }
+  },
+  "start": {
+    "cmd": "node dist/server/index.js"
+  }
+}
