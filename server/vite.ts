@@ -1,11 +1,20 @@
 import express, { type Express } from "express";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { createServer as createViteServer, createLogger } from "vite";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
-import { resolveFromRoot } from "./utils";
+
+// Get dirname in ESM context
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const projectRoot = path.resolve(__dirname, '..');
+
+// Resolve a path relative to the project root
+function resolveFromRoot(...pathSegments: string[]) {
+  return path.resolve(projectRoot, ...pathSegments);
+}
 
 const viteLogger = createLogger();
 

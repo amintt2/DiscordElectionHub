@@ -28,7 +28,7 @@ global.__filename = fileURLToPath(import.meta.url);
 import "./server.js";' > dist/server/index.js
 
 # Use locally installed esbuild from node_modules to build the server with ESM format
-./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server/server.js --define:import.meta.dirname="path.dirname(fileURLToPath(import.meta.url))"
+./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server/server.js
 
 # Copy any other necessary server files
 if [ -d "server/public" ]; then

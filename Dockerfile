@@ -35,7 +35,7 @@ global.__filename = fileURLToPath(import.meta.url);\
 import "./server.js";' > dist/server/index.js
 
 # Build the server with ESM format
-RUN npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server/server.js --define:import.meta.dirname="path.dirname(fileURLToPath(import.meta.url))"
+RUN npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server/server.js
 
 # Copy any other necessary server files
 RUN if [ -d "server/public" ]; then mkdir -p dist/server/public && cp -r server/public/* dist/server/public/; fi
