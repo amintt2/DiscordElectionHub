@@ -54,23 +54,33 @@ This application is configured for easy deployment with Coolify using Nixpacks.
    - Select your repository
    - Select Nixpacks as the buildpack
    - Set port to 5000
+   - Set the build command to: `npm run build`
+   - Set the start command to: `node dist/server/index.js`
 
 2. Configure the following Environment Variables:
    ```
    PORT=5000
    HOST=0.0.0.0
    NODE_ENV=production
-   DISCORD_CLIENT_ID=your_discord_client_id
+   DISCORD_CLIENT_ID=1359176431698972874
    DISCORD_CLIENT_SECRET=your_discord_client_secret
+   DISCORD_PUBLIC_KEY=e6fd95c5957c28afa6cc7a2aa00352151bf0a5b80167622264d9272fb9e68f56
    DISCORD_REDIRECT_URI=https://your-deployed-app-domain.com/api/auth/discord/callback
    SESSION_SECRET=your_random_secure_string
    AUTH_COOKIE_SECURE=true
    AUTH_COOKIE_SAME_SITE=lax
+   USE_MEMORY_STORAGE=true
    ```
 
-3. Deploy the application
-   - The deployment will use the provided nixpacks.json configuration
+3. Important Configuration Notes:
+   - Make sure to replace `your_discord_client_secret` with your actual Discord client secret
+   - Update `your-deployed-app-domain.com` in the DISCORD_REDIRECT_URI to match your actual domain
+   - Generate a random string for SESSION_SECRET (you can use a tool like [random.org](https://www.random.org/strings/))
+   - The application will use in-memory storage by default. For production, you may want to set up a database
+
+4. Deploy the application
    - The server will run on port 5000
+   - The application will be available at your configured domain
 
 ## Discord Application Setup
 
