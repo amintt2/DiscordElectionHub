@@ -23,7 +23,7 @@ global.__dirname = fileURLToPath(new URL(".", import.meta.url));
 import "./server.js";' > dist/server/index.js
 
 # Use locally installed esbuild from node_modules to build the server with CommonJS format
-./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outdir=dist/server --outfile=dist/server/server.js
+./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outfile=dist/server/server.js
 
 # Copy any other necessary server files
 if [ -d "server/public" ]; then

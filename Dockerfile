@@ -29,7 +29,7 @@ RUN echo 'import { fileURLToPath } from "url";\
 global.__dirname = fileURLToPath(new URL(".", import.meta.url));\
 import "./server.js";' > dist/server/index.js
 # Build the server with CommonJS format
-RUN npx esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outdir=dist/server --outfile=dist/server/server.js
+RUN npx esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outfile=dist/server/server.js
 
 # Copy any other necessary server files
 RUN if [ -d "server/public" ]; then mkdir -p dist/server/public && cp -r server/public/* dist/server/public/; fi
