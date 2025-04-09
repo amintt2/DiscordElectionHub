@@ -29,14 +29,14 @@ const getCallbackUrl = () => {
     const domain = process.env.REPLIT_DOMAINS.split(",")[0];
     return `https://${domain}/api/auth/discord/callback`;
   }
-  
+
   // Get the host and port from environment or use defaults
   const host = process.env.HOST || "localhost";
   const port = process.env.PORT || "3000";
-  
+
   // Determine the protocol based on environment
   const protocol = host === "localhost" ? "http" : "https";
-  
+
   // Build the callback URL
   return `${protocol}://${host}${port ? `:${port}` : ""}/api/auth/discord/callback`;
 };
@@ -49,7 +49,7 @@ export const setupAuth = (app: express.Express) => {
       secret: process.env.SESSION_SECRET || nanoid(32),
       resave: false,
       saveUninitialized: false,
-      cookie: { 
+      cookie: {
         secure: process.env.AUTH_COOKIE_SECURE === "true" || process.env.NODE_ENV === "production",
         sameSite: (process.env.AUTH_COOKIE_SAME_SITE as "strict" | "lax" | "none" | undefined) || "lax",
         maxAge: parseInt(process.env.SESSION_MAX_AGE || "86400000") // Default: 1 day in milliseconds
@@ -66,48 +66,56 @@ export const setupAuth = (app: express.Express) => {
 
   // Set up Discord strategy
   try {
-    passport.use(
-      new DiscordStrategy(
-        {
-          clientID: DISCORD_CLIENT_ID,
-          clientSecret: DISCORD_CLIENT_SECRET,
-          callbackURL: getCallbackUrl(),
-          scope: ["identify", "guilds", "guilds.members.read"]
-        },
-        async (accessToken: string, refreshToken: string, profile: any, done: any) => {
-          try {
-            // Find or create user
-            let user = await storage.getUser(profile.id);
-            
-            if (!user) {
-              user = await storage.createUser({
-                id: profile.id,
-                username: profile.username,
-                avatar: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
-                discriminator: profile.discriminator,
-                accessToken,
-                refreshToken
-              });
-            } else {
-              // Update existing user
-              user = await storage.updateUser(profile.id, {
-                username: profile.username,
-                avatar: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
-                discriminator: profile.discriminator,
-                accessToken,
-                refreshToken,
-                lastLogin: new Date()
-              }) || user;
+    // Only set up Discord strategy if we have valid credentials
+    if (DISCORD_CLIENT_ID && DISCORD_CLIENT_SECRET) {
+      passport.use(
+        new DiscordStrategy(
+          {
+            clientID: DISCORD_CLIENT_ID,
+            clientSecret: DISCORD_CLIENT_SECRET,
+            callbackURL: getCallbackUrl(),
+            scope: ["identify", "guilds", "guilds.members.read"]
+          },
+          async (accessToken: string, refreshToken: string, profile: any, done: any) => {
+            try {
+              // Find or create user
+              let user = await storage.getUser(profile.id);
+
+              if (!user) {
+                user = await storage.createUser({
+                  id: profile.id,
+                  username: profile.username,
+                  avatar: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
+                  discriminator: profile.discriminator,
+                  accessToken,
+                  refreshToken
+                });
+              } else {
+                // Update existing user
+                user = await storage.updateUser(profile.id, {
+                  username: profile.username,
+                  avatar: profile.avatar ? `https://cdn.discordapp.com/avatars/${profile.id}/${profile.avatar}.png` : null,
+                  discriminator: profile.discriminator,
+                  accessToken,
+                  refreshToken,
+                  lastLogin: new Date()
+                }) || user;
+              }
+
+              return done(null, user);
+            } catch (error) {
+              console.error("Error in Discord auth strategy:", error);
+              return done(error, null);
             }
-            
-            return done(null, user);
-          } catch (error) {
-            console.error("Error in Discord auth strategy:", error);
-            return done(error, null);
           }
-        }
-      )
-    );
+        )
+      );
+
+      // Log successful setup
+      console.log("Discord OAuth2 configured successfully");
+    } else if (process.env.NODE_ENV === 'development') {
+      console.warn("Running in development mode without Discord OAuth2 credentials. Authentication features will be limited.");
+    }
 
     // Serialize user to session
     passport.serializeUser((user: any, done) => {
@@ -123,28 +131,30 @@ export const setupAuth = (app: express.Express) => {
         done(error, null);
       }
     });
-
-    // Log successful setup
-    console.log("Discord OAuth2 configured successfully");
   } catch (error) {
     console.error("Failed to set up Discord OAuth2:", error);
   }
 
   // Auth routes
-  app.get(
-    "/api/auth/discord",
-    passport.authenticate("discord")
-  );
+  app.get("/api/auth/discord", (req, res, next) => {
+    if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
+      return res.status(503).json({
+        message: "Discord authentication is not configured. Please set DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET environment variables."
+      });
+    }
+    passport.authenticate("discord")(req, res, next);
+  });
 
-  app.get(
-    "/api/auth/discord/callback",
+  app.get("/api/auth/discord/callback", (req, res, next) => {
+    if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET) {
+      return res.redirect("/login?error=discord_not_configured");
+    }
     passport.authenticate("discord", {
       failureRedirect: "/login?error=auth_failed"
-    }),
-    (req, res) => {
-      res.redirect("/");
-    }
-  );
+    })(req, res, next);
+  }, (req, res) => {
+    res.redirect("/");
+  });
 
   app.get("/api/auth/logout", (req, res) => {
     req.logout(() => {
@@ -154,9 +164,9 @@ export const setupAuth = (app: express.Express) => {
 
   app.get("/api/auth/status", (req, res) => {
     if (req.isAuthenticated()) {
-      res.json({ 
-        authenticated: true, 
-        user: req.user 
+      res.json({
+        authenticated: true,
+        user: req.user
       });
     } else {
       res.json({ authenticated: false });
