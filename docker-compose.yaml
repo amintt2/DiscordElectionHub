@@ -2,7 +2,11 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=production
     restart: always
     environment:
       - NODE_ENV=production
@@ -22,9 +26,10 @@ services:
       - traefik.http.routers.discord-election-hub.entryPoints=http,https
       - traefik.http.services.discord-election-hub.loadbalancer.server.port=5000
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:5000/health || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
     # Environment variables are passed directly through the environment section
     # No need to mount the .env file
