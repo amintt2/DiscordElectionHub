@@ -24,12 +24,18 @@ RUN npm run build
 
 # Build the server
 RUN mkdir -p dist/server
-# Create a simple ESM wrapper for the server
+# Create a simple ESM wrapper with path resolution
 RUN echo 'import { fileURLToPath } from "url";\
-global.__dirname = fileURLToPath(new URL(".", import.meta.url));\
+import path from "path";\
+const __dirname = path.dirname(fileURLToPath(import.meta.url));\
+global.__dirname = __dirname;\
+global.__filename = fileURLToPath(import.meta.url);\
+\
+// Import the server code\
 import "./server.js";' > dist/server/index.js
-# Build the server with CommonJS format
-RUN npx esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outfile=dist/server/server.js
+
+# Build the server with ESM format
+RUN npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server/server.js --define:import.meta.dirname="path.dirname(fileURLToPath(import.meta.url))"
 
 # Copy any other necessary server files
 RUN if [ -d "server/public" ]; then mkdir -p dist/server/public && cp -r server/public/* dist/server/public/; fi

@@ -17,13 +17,18 @@ echo "=== Building server ==="
 # Extract the server files
 mkdir -p dist/server
 
-# Create a simple ESM wrapper for the server
+# Create a simple ESM wrapper with path resolution
 echo 'import { fileURLToPath } from "url";
-global.__dirname = fileURLToPath(new URL(".", import.meta.url));
+import path from "path";
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+global.__dirname = __dirname;
+global.__filename = fileURLToPath(import.meta.url);
+
+// Import the server code
 import "./server.js";' > dist/server/index.js
 
-# Use locally installed esbuild from node_modules to build the server with CommonJS format
-./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outfile=dist/server/server.js
+# Use locally installed esbuild from node_modules to build the server with ESM format
+./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outfile=dist/server/server.js --define:import.meta.dirname="path.dirname(fileURLToPath(import.meta.url))"
 
 # Copy any other necessary server files
 if [ -d "server/public" ]; then
