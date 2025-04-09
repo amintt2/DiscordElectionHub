@@ -1,0 +1,13 @@
+{
+  "name": "discord-election-hub",
+  "version": "1.0.0",
+  "type": "module",
+  "license": "MIT",
+  "main": "dist/server/index.js",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "node dist/server/index.js"
+  }
+}

@@ -32,7 +32,7 @@ The application includes a `nixpacks.json` file that configures how the applicat
     }
   },
   "start": {
-    "cmd": "node dist/server/index.js"
+    "cmd": "chmod +x ./start.sh && ./start.sh"
   }
 }
 ```
@@ -96,3 +96,31 @@ After deployment, update your Discord application configuration:
 - **Application can't connect to Discord**: Verify your DISCORD_CLIENT_ID and DISCORD_CLIENT_SECRET
 - **OAuth2 redirects fail**: Make sure DISCORD_REDIRECT_URI matches exactly what's in your Discord Developer Portal
 - **Session issues**: Check SESSION_SECRET is set and AUTH_COOKIE_* settings match your domain configuration
+
+### Common Deployment Issues
+
+#### Detected as Static Site (404 errors)
+
+If Coolify detects your application as a static site (running with Caddy server) instead of a Node.js application, you'll see 404 errors when accessing the application.
+
+**Symptoms:**
+- 404 errors in the browser
+- Log messages from Caddy server instead of Node.js
+- Logs containing: `{"level":"info","ts":TIMESTAMP,"msg":"using config from file","file":"/assets/Caddyfile"}`
+
+**Solution:**
+1. Ensure you have the following files in your repository:
+   - `nixpacks.toml` (with correct start command)
+   - `Procfile` (with correct web command)
+   - `start.sh` (executable script to run the server)
+
+2. In Coolify deployment settings:
+   - Force detection type to "Node.js" if available
+   - Set PORT environment variable to 5000
+   - Try enabling "Use Custom Nixpacks" if available
+
+3. If the problem persists, consider adding a `.nixpacks/build.sh` file:
+   ```bash
+   #!/bin/bash
+   node dist/server/index.js
+   ```

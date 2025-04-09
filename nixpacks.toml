@@ -1,0 +1,16 @@
+[phases.setup]
+nixPkgs = ["nodejs_18", "npm-9_x"]
+
+[phases.install]
+cmds = ["npm ci"]
+
+[phases.build]
+cmds = ["chmod +x ./build.sh", "./build.sh"]
+
+[start]
+cmd = "chmod +x ./start.sh && ./start.sh"
+
+[variables]
+NODE_ENV = "production"
+PORT = "5000"
+HOST = "0.0.0.0"

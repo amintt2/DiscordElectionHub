@@ -1,0 +1,303 @@
+Starting deployment of amintt2/DiscordElectionHub:main to localhost.
+Preparing container with helper image: ghcr.io/coollabsio/coolify-helper:1.0.8.
+Starting graceful shutdown container: m4cg8wccogo8sg4s4880s4cs
+[CMD]: docker inspect -f '{{.State.Running}}' m4cg8wccogo8sg4s4880s4cs
+Error: No such object: m4cg8wccogo8sg4s4880s4cs
+[CMD]: docker rm -f m4cg8wccogo8sg4s4880s4cs
+Error response from daemon: No such container: m4cg8wccogo8sg4s4880s4cs
+[CMD]: docker run -d --network coolify --name m4cg8wccogo8sg4s4880s4cs --rm -v /var/run/docker.sock:/var/run/docker.sock ghcr.io/coollabsio/coolify-helper:1.0.8
+9c2809c7e99234ddfb91fb8125745a8252992b59250e856fcc6dc32a5195927a
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'GIT_SSH_COMMAND="ssh -o ConnectTimeout=30 -p 22 -o Port=22 -o LogLevel=ERROR -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git ls-remote https://x-access-token:<REDACTED>@github.com/amintt2/DiscordElectionHub.git main'
+59c12910905cedb3fd61958dfb552d1b4c8210a9	refs/heads/main
+[CMD]: docker images -q bg0oskwog4o48s8840g0ks40:59c12910905cedb3fd61958dfb552d1b4c8210a9 2>/dev/null
+bb39eeaeef45
+Configuration changed. Rebuilding image.
+----------------------------------------
+Importing amintt2/DiscordElectionHub:main (commit sha HEAD) to /artifacts/m4cg8wccogo8sg4s4880s4cs.
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'git clone -b "main" https://x-access-token:<REDACTED>@github.com/amintt2/DiscordElectionHub.git /artifacts/m4cg8wccogo8sg4s4880s4cs && cd /artifacts/m4cg8wccogo8sg4s4880s4cs && GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git submodule update --init --recursive && cd /artifacts/m4cg8wccogo8sg4s4880s4cs && GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" git lfs pull'
+Cloning into '/artifacts/m4cg8wccogo8sg4s4880s4cs'...
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'cd /artifacts/m4cg8wccogo8sg4s4880s4cs && git log -1 59c12910905cedb3fd61958dfb552d1b4c8210a9 --pretty=%B'
+Checkpoint
+Replit-Commit-Author: Agent
+Replit-Commit-Session-Id: 8b21ca38-06be-46f9-a069-f9bddb928171
+Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/6624b254-8f21-4020-973c-6db8fcfa5d35/de87c2f0-566e-4b94-9763-45d55d1ed114.jpg
+Generating nixpacks configuration with: nixpacks plan -f toml  /artifacts/m4cg8wccogo8sg4s4880s4cs
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'nixpacks plan -f toml  /artifacts/m4cg8wccogo8sg4s4880s4cs'
+providers = []
+buildImage = 'ghcr.io/railwayapp/nixpacks:ubuntu-1741046653'
+[variables]
+CI = 'true'
+NIXPACKS_METADATA = 'node'
+NIXPACKS_SPA_OUTPUT_DIR = 'dist'
+NODE_ENV = 'production'
+NPM_CONFIG_PRODUCTION = 'false'
+[staticAssets]
+Caddyfile = '''
+# global options
+{
+admin off # theres no need for the admin api in railway's environment
+persist_config off # storage isn't persistent anyway
+auto_https off # railway handles https for us, this would cause issues if left enabled
+# runtime logs
+log {
+format json # set runtime log format to json mode
+}
+# server options
+servers {
+trusted_proxies static private_ranges 100.0.0.0/8 # trust railway's proxy
+}
+}
+# site block, listens on the $PORT environment variable, automatically assigned by railway
+:{$PORT:3000} {
+# access logs
+log {
+format json # set access log format to json mode
+}
+# health check for railway
+rewrite /health /*
+# serve from the 'dist' folder (Vite builds into the 'dist' folder)
+root * ../app/{$NIXPACKS_SPA_OUTPUT_DIR}
+# enable gzipping responses
+encode gzip
+# serve files from 'dist'
+file_server
+# if path doesn't exist, redirect it to 'index.html' for client side routing
+try_files {path} /index.html
+}'''
+[phases.build]
+dependsOn = ['install']
+cmds = ['npm run build']
+cacheDirectories = ['node_modules/.cache']
+[phases.caddy]
+dependsOn = ['setup']
+nixPkgs = ['caddy']
+nixOverlays = []
+nixpkgsArchive = 'ba913eda2df8eb72147259189d55932012df6301'
+cmds = ['caddy fmt --overwrite /assets/Caddyfile']
+[phases.install]
+dependsOn = ['setup']
+cmds = ['npm ci']
+cacheDirectories = ['/root/.npm']
+paths = ['/app/node_modules/.bin']
+[phases.setup]
+nixPkgs = [
+'nodejs_18',
+'npm-9_x',
+'openssl',
+]
+nixOverlays = ['https://github.com/railwayapp/nix-npm-overlay/archive/main.tar.gz']
+nixpkgsArchive = 'ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7'
+[start]
+cmd = 'exec caddy run --config /assets/Caddyfile --adapter caddyfile 2>&1'
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'nixpacks detect /artifacts/m4cg8wccogo8sg4s4880s4cs'
+node
+Found application type: node.
+If you need further customization, please check the documentation of Nixpacks: https://nixpacks.com/docs/providers/node
+Final Nixpacks plan: {
+"providers": [],
+"buildImage": "ghcr.io\/railwayapp\/nixpacks:ubuntu-1741046653",
+"variables": {
+"CI": "true",
+"NIXPACKS_METADATA": "node",
+"NIXPACKS_SPA_OUTPUT_DIR": "dist",
+"NODE_ENV": "production",
+"NPM_CONFIG_PRODUCTION": "false",
+"SOURCE_COMMIT": "59c12910905cedb3fd61958dfb552d1b4c8210a9"
+},
+"staticAssets": {
+"Caddyfile": "# global options\n{\n admin off # theres no need for the admin api in railway's environment\n persist_config off # storage isn't persistent anyway\n auto_https off # railway handles https for us, this would cause issues if left enabled\n # runtime logs\n log {\n  format json # set runtime log format to json mode \n }\n # server options\n servers {\n  trusted_proxies static private_ranges 100.0.0.0\/8 # trust railway's proxy\n }\n}\n\n# site block, listens on the $PORT environment variable, automatically assigned by railway\n:{$PORT:3000} {\n # access logs\n log {\n  format json # set access log format to json mode\n }\n\n # health check for railway\n rewrite \/health \/*\n\n # serve from the 'dist' folder (Vite builds into the 'dist' folder)\n    root * ..\/app\/{$NIXPACKS_SPA_OUTPUT_DIR}\n\n # enable gzipping responses\n encode gzip\n\n # serve files from 'dist'\n file_server \n\n # if path doesn't exist, redirect it to 'index.html' for client side routing\n try_files {path} \/index.html\n}"
+},
+"phases": {
+"build": {
+"dependsOn": [
+"install"
+],
+"cmds": [
+"npm run build"
+],
+"cacheDirectories": [
+"node_modules\/.cache"
+]
+},
+"caddy": {
+"dependsOn": [
+"setup"
+],
+"nixPkgs": [
+"caddy"
+],
+"nixOverlays": [],
+"nixpkgsArchive": "ba913eda2df8eb72147259189d55932012df6301",
+"cmds": [
+"caddy fmt --overwrite \/assets\/Caddyfile"
+]
+},
+"install": {
+"dependsOn": [
+"setup"
+],
+"cmds": [
+"npm ci"
+],
+"cacheDirectories": [
+"\/root\/.npm"
+],
+"paths": [
+"\/app\/node_modules\/.bin"
+]
+},
+"setup": {
+"nixPkgs": [
+"nodejs_18",
+"npm-9_x",
+"openssl"
+],
+"nixOverlays": [
+"https:\/\/github.com\/railwayapp\/nix-npm-overlay\/archive\/main.tar.gz"
+],
+"nixpkgsArchive": "ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7",
+"aptPkgs": [
+"curl",
+"wget"
+]
+}
+},
+"start": {
+"cmd": "exec caddy run --config \/assets\/Caddyfile --adapter caddyfile 2>&1"
+}
+}
+----------------------------------------
+Building docker image started.
+To check the current progress, click on Show Debug Logs.
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'nixpacks build -c /artifacts/thegameplan.json --cache-key 'bg0oskwog4o48s8840g0ks40' --no-error-without-start -n bg0oskwog4o48s8840g0ks40:59c12910905cedb3fd61958dfb552d1b4c8210a9 /artifacts/m4cg8wccogo8sg4s4880s4cs -o /artifacts/m4cg8wccogo8sg4s4880s4cs'
+╔══════════════════════════════ Nixpacks v1.34.1 ══════════════════════════════╗
+║ setup      │ nodejs_18, npm-9_x, openssl, curl, wget                         ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ caddy      │ pkgs: caddy                                                     ║
+║            │ cmds: caddy fmt --overwrite /assets/Caddyfile                   ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ install    │ npm ci                                                          ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ build      │ npm run build                                                   ║
+║──────────────────────────────────────────────────────────────────────────────║
+║ start      │ exec caddy run --config /assets/Caddyfile --adapter caddyfile   ║
+║            │ 2>&1                                                            ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+Saved output to:
+/artifacts/m4cg8wccogo8sg4s4880s4cs
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'cat /artifacts/build.sh'
+docker build --add-host b8k8ocwgws0k04okggo8ogo8:10.0.1.7 --add-host b8k8ocwgws0k04okggo8ogo8-proxy:10.0.1.8 --add-host coolify:10.0.1.5 --add-host coolify-db:10.0.1.2 --add-host coolify-realtime:10.0.1.3 --add-host coolify-redis:10.0.1.4 --add-host wcg8wk488sswcwgkkgks84ww:10.0.1.9 --add-host wcg8wk488sswcwgkkgks84ww-proxy:10.0.1.12 --network host -f /artifacts/m4cg8wccogo8sg4s4880s4cs/.nixpacks/Dockerfile --build-arg CI='true' --build-arg NIXPACKS_METADATA='node' --build-arg NIXPACKS_SPA_OUTPUT_DIR='dist' --build-arg NODE_ENV='production' --build-arg NPM_CONFIG_PRODUCTION='false' --build-arg SOURCE_COMMIT='59c12910905cedb3fd61958dfb552d1b4c8210a9' --build-arg 'COOLIFY_URL=https://bg0oskwog4o48s8840g0ks40.mciut.fr' --build-arg 'COOLIFY_FQDN=bg0oskwog4o48s8840g0ks40.mciut.fr' --build-arg 'COOLIFY_BRANCH="main"' --build-arg 'COOLIFY_RESOURCE_UUID=bg0oskwog4o48s8840g0ks40' --build-arg 'COOLIFY_CONTAINER_NAME=bg0oskwog4o48s8840g0ks40-125417093890' --progress plain -t bg0oskwog4o48s8840g0ks40:59c12910905cedb3fd61958dfb552d1b4c8210a9 /artifacts/m4cg8wccogo8sg4s4880s4cs
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'bash /artifacts/build.sh'
+#0 building with "default" instance using docker driver
+#1 [internal] load build definition from Dockerfile
+#1 transferring dockerfile: 1.60kB done
+#1 DONE 0.0s
+#2 [internal] load metadata for ghcr.io/railwayapp/nixpacks:ubuntu-1741046653
+#2 DONE 0.5s
+#3 [internal] load .dockerignore
+#3 transferring context: 2B done
+#3 DONE 0.0s
+#4 [stage-0  1/16] FROM ghcr.io/railwayapp/nixpacks:ubuntu-1741046653@sha256:ed406b77fb751927991b8655e76c33a4521c4957c2afeab293be7c63c2a373d2
+#4 DONE 0.0s
+#5 [internal] load build context
+#5 transferring context: 1.15MB 0.0s done
+#5 DONE 0.0s
+#6 [stage-0  2/16] WORKDIR /app/
+#6 CACHED
+#7 [stage-0  5/16] COPY .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix
+#7 CACHED
+#8 [stage-0  7/16] RUN sudo apt-get update && sudo apt-get install -y --no-install-recommends curl wget
+#8 CACHED
+#9 [stage-0  6/16] RUN nix-env -if .nixpacks/nixpkgs-ffeebf0acf3ae8b29f8c7049cd911b9636efd7e7.nix && nix-collect-garbage -d
+#9 CACHED
+#10 [stage-0  3/16] COPY .nixpacks/nixpkgs-ba913eda2df8eb72147259189d55932012df6301.nix .nixpacks/nixpkgs-ba913eda2df8eb72147259189d55932012df6301.nix
+#10 CACHED
+#11 [stage-0  4/16] RUN nix-env -if .nixpacks/nixpkgs-ba913eda2df8eb72147259189d55932012df6301.nix && nix-collect-garbage -d
+#11 CACHED
+#12 [stage-0  8/16] COPY .nixpacks/assets /assets/
+#12 CACHED
+#13 [stage-0  9/16] COPY . /app/.
+#13 DONE 0.0s
+#14 [stage-0 10/16] RUN  caddy fmt --overwrite /assets/Caddyfile
+#14 DONE 0.2s
+#15 [stage-0 11/16] COPY . /app/.
+#15 DONE 0.1s
+#16 [stage-0 12/16] RUN --mount=type=cache,id=bg0oskwog4o48s8840g0ks40-/root/npm,target=/root/.npm npm ci
+#16 0.274 npm warn config production Use `--omit=dev` instead.
+#16 4.819 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+#16 5.062 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+#16 12.28
+#16 12.28 added 483 packages, and audited 484 packages in 12s
+#16 12.28
+#16 12.28 62 packages are looking for funding
+#16 12.28   run `npm fund` for details
+#16 12.32
+#16 12.32 8 moderate severity vulnerabilities
+#16 12.32
+#16 12.32 To address issues that do not require attention, run:
+#16 12.32   npm audit fix
+#16 12.32
+#16 12.32 To address all issues (including breaking changes), run:
+#16 12.32   npm audit fix --force
+#16 12.32
+#16 12.32 Run `npm audit` for details.
+#16 DONE 12.8s
+#17 [stage-0 13/16] COPY . /app/.
+#17 DONE 0.1s
+#18 [stage-0 14/16] RUN --mount=type=cache,id=bg0oskwog4o48s8840g0ks40-node_modules/cache,target=/app/node_modules/.cache npm run build
+#18 0.285 npm warn config production Use `--omit=dev` instead.
+#18 0.320
+#18 0.320 > rest-express@1.0.0 build
+#18 0.320 > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+#18 0.320
+#18 0.897 vite v5.4.14 building for production...
+#18 0.993 transforming...
+#18 1.627 Browserslist: browsers data (caniuse-lite) is 6 months old. Please run:
+#18 1.627   npx update-browserslist-db@latest
+#18 1.627   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+#18 7.909 ✓ 2022 modules transformed.
+#18 8.295 rendering chunks...
+#18 8.312 computing gzip size...
+#18 8.346 ../dist/public/index.html                   2.10 kB │ gzip:   0.88 kB
+#18 8.346 ../dist/public/assets/index-CgSND2pr.css   59.90 kB │ gzip:  10.93 kB
+#18 8.346 ../dist/public/assets/index-DGiLVSIL.js   406.53 kB │ gzip: 123.93 kB
+#18 8.347 ✓ built in 7.42s
+#18 8.598
+#18 8.598   dist/index.js  36.6kb
+#18 8.598
+#18 8.598 ⚡ Done in 14ms
+#18 DONE 8.6s
+#19 [stage-0 15/16] RUN printf '\nPATH=/app/node_modules/.bin:$PATH' >> /root/.profile
+#19 DONE 0.2s
+#20 [stage-0 16/16] COPY . /app
+#20 DONE 0.1s
+#21 exporting to image
+#21 exporting layers
+#21 exporting layers 4.0s done
+#21 writing image sha256:08ea0e4fc667e2bfa1fedb972094b9bacad1392f399229c7452ae0ef2c2b3e03 done
+#21 naming to docker.io/library/bg0oskwog4o48s8840g0ks40:59c12910905cedb3fd61958dfb552d1b4c8210a9 done
+#21 DONE 4.1s
+1 warning found (use docker --debug to expand):
+- UndefinedVar: Usage of undefined variable '$NIXPACKS_PATH' (line 24)
+Building docker image completed.
+----------------------------------------
+Rolling update started.
+[CMD]: docker exec m4cg8wccogo8sg4s4880s4cs bash -c 'SOURCE_COMMIT=59c12910905cedb3fd61958dfb552d1b4c8210a9 COOLIFY_FQDN=https://bg0oskwog4o48s8840g0ks40.mciut.fr COOLIFY_URL=bg0oskwog4o48s8840g0ks40.mciut.fr COOLIFY_BRANCH=main  docker compose --project-name bg0oskwog4o48s8840g0ks40 --project-directory /artifacts/m4cg8wccogo8sg4s4880s4cs -f /artifacts/m4cg8wccogo8sg4s4880s4cs/docker-compose.yaml up --build -d'
+time="2025-04-09T12:54:52Z" level=warning msg="Found orphan containers ([bg0oskwog4o48s8840g0ks40-124759756208]) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+Container bg0oskwog4o48s8840g0ks40-125417093890  Creating
+bg0oskwog4o48s8840g0ks40-125417093890 Your kernel does not support memory swappiness capabilities or the cgroup is not mounted. Memory swappiness discarded.
+Container bg0oskwog4o48s8840g0ks40-125417093890  Created
+Container bg0oskwog4o48s8840g0ks40-125417093890  Starting
+Container bg0oskwog4o48s8840g0ks40-125417093890  Started
+New container started.
+Removing old containers.
+[CMD]: docker inspect -f '{{.State.Running}}' bg0oskwog4o48s8840g0ks40-124759756208
+true
+[CMD]: docker rm -f bg0oskwog4o48s8840g0ks40-124759756208
+bg0oskwog4o48s8840g0ks40-124759756208
+Rolling update completed.
+Starting graceful shutdown container: m4cg8wccogo8sg4s4880s4cs
+[CMD]: docker inspect -f '{{.State.Running}}' m4cg8wccogo8sg4s4880s4cs
+true
+[CMD]: docker rm -f m4cg8wccogo8sg4s4880s4cs
+m4cg8wccogo8sg4s4880s4cs
