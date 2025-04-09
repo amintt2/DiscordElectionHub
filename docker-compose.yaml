@@ -11,14 +11,14 @@ services:
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - DISCORD_PUBLIC_KEY=${DISCORD_PUBLIC_KEY}
-      - DISCORD_REDIRECT_URI=https://${SERVICE_FQDN_APP}/api/auth/discord/callback
+      - DISCORD_REDIRECT_URI=${DISCORD_REDIRECT_URI:-https://leaderbord.mciut.fr/api/auth/discord/callback}
       - SESSION_SECRET=${SESSION_SECRET:-random_secure_string_for_session}
       - AUTH_COOKIE_SECURE=true
       - AUTH_COOKIE_SAME_SITE=lax
       - USE_MEMORY_STORAGE=true
     labels:
       - traefik.enable=true
-      - traefik.http.routers.discord-election-hub.rule=Host(`${SERVICE_FQDN_APP}`)
+      - traefik.http.routers.discord-election-hub.rule=Host(`leaderbord.mciut.fr`)
       - traefik.http.routers.discord-election-hub.entryPoints=http,https
       - traefik.http.services.discord-election-hub.loadbalancer.server.port=5000
     healthcheck:
@@ -26,8 +26,5 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    volumes:
-      - type: bind
-        source: ./.env.production
-        target: /app/.env
-        is_directory: false
+    # Environment variables are passed directly through the environment section
+    # No need to mount the .env file
