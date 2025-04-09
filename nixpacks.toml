@@ -5,10 +5,10 @@ nixPkgs = ["nodejs_18", "npm-9_x"]
 cmds = ["npm ci"]
 
 [phases.build]
-cmds = ["chmod +x ./build.sh", "./build.sh"]
+cmds = ["npm run build"]
 
 [start]
-cmd = "chmod +x ./start.sh && ./start.sh"
+cmd = "node dist/server/index.js"
 
 [variables]
 NODE_ENV = "production"

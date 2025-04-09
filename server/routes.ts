@@ -15,6 +15,11 @@ import crypto from "crypto";
 import { verifyDiscordInteraction } from "./discord-utils";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint
+  app.get('/health', (req: Request, res: Response) => {
+    res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
   // Set up authentication
   setupAuth(app);
 
