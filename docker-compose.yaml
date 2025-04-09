@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   app:
-    image: ${IMAGE_NAME}
+    build: .
     restart: always
     environment:
       - NODE_ENV=production
@@ -11,15 +11,23 @@ services:
       - DISCORD_CLIENT_ID=${DISCORD_CLIENT_ID}
       - DISCORD_CLIENT_SECRET=${DISCORD_CLIENT_SECRET}
       - DISCORD_PUBLIC_KEY=${DISCORD_PUBLIC_KEY}
-      - DISCORD_REDIRECT_URI=https://${COOLIFY_FQDN}/api/auth/discord/callback
-      - SESSION_SECRET=${SESSION_SECRET}
+      - DISCORD_REDIRECT_URI=https://${SERVICE_FQDN_APP}/api/auth/discord/callback
+      - SESSION_SECRET=${SESSION_SECRET:-random_secure_string_for_session}
       - AUTH_COOKIE_SECURE=true
       - AUTH_COOKIE_SAME_SITE=lax
       - USE_MEMORY_STORAGE=true
-    ports:
-      - "${PORT}:5000"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.discord-election-hub.rule=Host(`${SERVICE_FQDN_APP}`)
+      - traefik.http.routers.discord-election-hub.entryPoints=http,https
+      - traefik.http.services.discord-election-hub.loadbalancer.server.port=5000
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/api/auth/status"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5000/health"]
       interval: 10s
       timeout: 5s
       retries: 5
+    volumes:
+      - type: bind
+        source: ./.env.production
+        target: /app/.env
+        is_directory: false
