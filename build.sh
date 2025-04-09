@@ -16,8 +16,14 @@ npm run build
 echo "=== Building server ==="
 # Extract the server files
 mkdir -p dist/server
-# Use locally installed esbuild from node_modules
-./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist/server
+
+# Create a simple ESM wrapper for the server
+echo 'import { fileURLToPath } from "url";
+global.__dirname = fileURLToPath(new URL(".", import.meta.url));
+import "./server.js";' > dist/server/index.js
+
+# Use locally installed esbuild from node_modules to build the server with CommonJS format
+./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=cjs --outdir=dist/server --outfile=dist/server/server.js
 
 # Copy any other necessary server files
 if [ -d "server/public" ]; then
