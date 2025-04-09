@@ -16,7 +16,8 @@ npm run build
 echo "=== Building server ==="
 # Extract the server files
 mkdir -p dist/server
-esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist/server
+# Use locally installed esbuild from node_modules
+./node_modules/.bin/esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist/server
 
 # Copy any other necessary server files
 if [ -d "server/public" ]; then
